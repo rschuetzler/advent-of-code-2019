@@ -39,9 +39,8 @@ def find_path_between_planets(orbits, planet1, planet2):
             if planet in path2_to_com:
                 common_planet = planet
                 break
-    
 
-    path1_to_common = path1_to_com[: path1_to_com.index(common_planet) +1]
+    path1_to_common = path1_to_com[: path1_to_com.index(common_planet) + 1]
     path2_to_common = path2_to_com[: path2_to_com.index(common_planet)]
     print(common_planet)
 
@@ -74,7 +73,6 @@ path = find_planet_path_to_com(orbits, "XVQ")
 
 # -3 accounts for the fact that the first two steps in the path are your current
 # location, so you don't need to transfer those, and the last step is the destination.
-# Since the goal is to orbit the same planet as the destination, not to orbit the 
+# Since the goal is to orbit the same planet as the destination, not to orbit the
 # destination, that's where we can stop.
-print(len(find_path_between_planets(orbits, "YOU", "SAN"))-3)
-
+print(len(find_path_between_planets(orbits, "YOU", "SAN")) - 3)
