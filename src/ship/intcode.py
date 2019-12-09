@@ -2,8 +2,10 @@ import csv
 
 
 class Intcode(object):
-    def __init__(self, memory):
-        self.memory = memory
+    def __init__(self, memory, inputs=[]):
+        self.memory = memory[:]
+        self.start_memory = memory[:]
+        self.inputs = inputs
         # self.memory[1] = noun
         # self.memory[2] = verb
         self.current_address = 0
@@ -18,6 +20,20 @@ class Intcode(object):
             8: 3,  # equals: val1, val2, position
             99: 0,  # End
         }
+
+    def reboot(self):
+        self.memory = self.start_memory[:]
+        self.current_address = 0
+
+    def reset_with_input(self, inputs):
+        self.reboot()
+        self.inputs = inputs
+
+    def set_inputs(self, inputs):
+        self.inputs = inputs
+
+    def add_input(self, input):
+        self.inputs.append(input)
 
     def step(self, instruction):
         self.current_address += self.num_params[instruction] + 1
@@ -74,13 +90,17 @@ class Intcode(object):
         # return op_addresses[2]
 
     def input(self, op_addresses):
-        input_value = int(input("Enter an input: "))
+        if self.inputs:
+            input_value = self.inputs.pop(0)
+        else:
+            input_value = int(input("Enter an input: "))
         self.memory[op_addresses[0]] = input_value
 
         # return op_addresses[0]
 
     def output(self, op_addresses):
         print(self.memory[op_addresses[0]])
+        return self.memory[op_addresses[0]]
         # return -1
 
     def jump_if_true(self, op_addresses):
@@ -129,20 +149,21 @@ class Intcode(object):
             pass
         else:
             self.step(instruction)
+            return action_value
 
     def run_intcode(self):
-
+        output = 0
         instruction, op_addresses = self.parse_instruction(
             self.memory[self.current_address]
         )
         while instruction != 99:
             # print(f"{instruction}: {op_addresses}")
-            self.do_action(instruction, op_addresses)
+            output = self.do_action(instruction, op_addresses)
             instruction, op_addresses = self.parse_instruction(
                 self.memory[self.current_address]
             )
 
-        return
+        return output
 
 
 if __name__ == "__main__":
