@@ -20,10 +20,31 @@ class Intcode(object):
             8: 3,  # equals: val1, val2, position
             99: 0,  # End
         }
+        self.status = 0  # 0: ready, 1: paused, -1: halted
+        self.last_output = 0
+
+    def halt(self, *args):
+        self.status = -1
+
+    def pause(self):
+        self.status = 1
+
+    def start(self):
+        if not self.is_halted():
+            self.status = 0
+            return self.run_intcode()
+        else:
+            raise ValueError("Program is halted")
+
+    def is_halted(self):
+        return self.status == -1
 
     def reboot(self):
         self.memory = self.start_memory[:]
         self.current_address = 0
+        self.status = 0
+        self.last_output = 0
+        self.inputs = []
 
     def reset_with_input(self, inputs):
         self.reboot()
@@ -32,8 +53,8 @@ class Intcode(object):
     def set_inputs(self, inputs):
         self.inputs = inputs
 
-    def add_input(self, input):
-        self.inputs.append(input)
+    def add_input(self, input_value):
+        self.inputs.append(input_value)
 
     def step(self, instruction):
         self.current_address += self.num_params[instruction] + 1
@@ -89,7 +110,7 @@ class Intcode(object):
         self.memory[op_addresses[2]] = arg1 * arg2
         # return op_addresses[2]
 
-    def input(self, op_addresses):
+    def get_input(self, op_addresses):
         if self.inputs:
             input_value = self.inputs.pop(0)
         else:
@@ -99,7 +120,9 @@ class Intcode(object):
         # return op_addresses[0]
 
     def output(self, op_addresses):
-        print(self.memory[op_addresses[0]])
+        # print(self.memory[op_addresses[0]])
+        self.status = 1
+        self.last_output = self.memory[op_addresses[0]]
         return self.memory[op_addresses[0]]
         # return -1
 
@@ -137,12 +160,13 @@ class Intcode(object):
         actions = {
             1: self.add,
             2: self.multiply,
-            3: self.input,
+            3: self.get_input,
             4: self.output,
             5: self.jump_if_true,
             6: self.jump_if_false,
             7: self.less_than,
             8: self.equals,
+            99: self.halt,
         }
         action_value = actions[instruction](op_addresses)
         if action_value == -1:
@@ -153,17 +177,15 @@ class Intcode(object):
 
     def run_intcode(self):
         output = 0
-        instruction, op_addresses = self.parse_instruction(
-            self.memory[self.current_address]
-        )
-        while instruction != 99:
+
+        while self.status == 0:
             # print(f"{instruction}: {op_addresses}")
-            output = self.do_action(instruction, op_addresses)
             instruction, op_addresses = self.parse_instruction(
                 self.memory[self.current_address]
             )
+            output = self.do_action(instruction, op_addresses)
 
-        return output
+        return self.last_output
 
 
 if __name__ == "__main__":
