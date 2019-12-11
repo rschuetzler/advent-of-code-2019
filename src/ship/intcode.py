@@ -212,12 +212,12 @@ class Intcode(object):
 
         while self.status == 0:
             # print(f"{instruction}: {op_addresses}")
-            print(
-                f"Current address: {self.current_address},",
-                f"value: {self.read(self.current_address)}",
-            )
-            print(f"Relative base: {self.relative_base}")
-            print(self.memory)
+            # print(
+            #     f"Current address: {self.current_address},",
+            #     f"value: {self.read(self.current_address)}",
+            # )
+            # print(f"Relative base: {self.relative_base}")
+            # print(self.memory)
             instruction, op_addresses = self.parse_instruction(
                 self.read(self.current_address)
             )
